@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.scene.text.Text?>
+<VBox alignment="TOP_CENTER" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/10.0.2-internal"
+      fx:controller="org.demo.Controller">
+
+    <VBox>
+        <Text>"Введите ФИО клиента"</Text>
+        <TextField fx:id="lastname" editable="true" promptText="Фамилия" focusTraversable="false"/>
+        <TextField fx:id="firstname" editable="true" promptText="Имя" focusTraversable="false"/>
+        <TextField fx:id="middlename" editable="true" promptText="Отчество" focusTraversable="false"/>
+    </VBox>
+    <Button maxWidth="80" text="GET" HBox.hgrow="ALWAYS" onAction="#btnGET"/>
+    <VBox>
+        <Text>"Ниже отображается Json responce"</Text>
+        <TextField fx:id="result" editable="false" focusTraversable="false"/>
+    </VBox>
+    <VBox>
+        <Text>"Ниже отображается id клиента"</Text>
+        <TextField fx:id="clientId" editable="false" focusTraversable="false"/>
+    </VBox>
+
+</VBox>
