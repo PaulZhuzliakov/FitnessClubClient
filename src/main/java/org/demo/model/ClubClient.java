@@ -18,6 +18,13 @@ public class ClubClient {
         this.middleName = middleName;
     }
 
+    public ClubClient(int clubCardNumber, String lastName, String firstName, String middleName) {
+        this.clubCardNumber = clubCardNumber;
+        this.lastName = lastName;
+        this.firstName = firstName;
+        this.middleName = middleName;
+    }
+
     public int getId() {
         return id;
     }

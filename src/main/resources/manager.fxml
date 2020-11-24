@@ -2,25 +2,34 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
-<?import javafx.scene.text.Text?>
-<VBox alignment="TOP_CENTER" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/10.0.2-internal"
-      fx:controller="org.demo.Controller">
+<VBox alignment="TOP_CENTER" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.demo.Controller">
 
     <VBox>
         <Text>"Введите ФИО клиента"</Text>
-        <TextField fx:id="lastname" editable="true" promptText="Фамилия" focusTraversable="false"/>
-        <TextField fx:id="firstname" editable="true" promptText="Имя" focusTraversable="false"/>
-        <TextField fx:id="middlename" editable="true" promptText="Отчество" focusTraversable="false"/>
+        <TextField fx:id="lastname" editable="true" focusTraversable="false" promptText="Фамилия" />
+        <TextField fx:id="firstname" editable="true" focusTraversable="false" promptText="Имя" />
+        <TextField fx:id="middlename" editable="true" focusTraversable="false" promptText="Отчество" />
     </VBox>
-    <Button maxWidth="80" text="GET" HBox.hgrow="ALWAYS" onAction="#btnGET"/>
+    <Button maxWidth="80" onAction="#btnGET" text="GET" HBox.hgrow="ALWAYS" />
     <VBox>
         <Text>"Ниже отображается Json responce"</Text>
-        <TextField fx:id="result" editable="false" focusTraversable="false"/>
+        <TextField fx:id="result" editable="false" focusTraversable="false" />
     </VBox>
     <VBox>
         <Text>"Ниже отображается id клиента"</Text>
-        <TextField fx:id="clientId" editable="false" focusTraversable="false"/>
+        <TextField fx:id="clientId" editable="false" focusTraversable="false" />
     </VBox>
+
+    <Button maxWidth="180" onAction="#refreshTable" text="Обновить таблицу" HBox.hgrow="ALWAYS" />
+    <TableView fx:id="table_clients">
+      <columns>
+         <TableColumn fx:id="col_cardNumber" prefWidth="47.0" text="№карты" />
+         <TableColumn fx:id="col_lastName" prefWidth="62.0" text="Фамилия" />
+         <TableColumn fx:id="col_firstName" prefWidth="62.0" text="Имя" />
+         <TableColumn fx:id="col_middleName" prefWidth="75.0" text="Отчество" />
+      </columns>
+    </TableView>
 
 </VBox>
