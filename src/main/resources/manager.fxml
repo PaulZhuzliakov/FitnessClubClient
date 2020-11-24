@@ -4,32 +4,39 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<VBox alignment="TOP_CENTER" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.demo.Controller">
+<HBox alignment="TOP_LEFT" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.demo.Controller">
 
     <VBox>
         <Text>"Введите ФИО клиента"</Text>
-        <TextField fx:id="lastname" editable="true" focusTraversable="false" promptText="Фамилия" />
-        <TextField fx:id="firstname" editable="true" focusTraversable="false" promptText="Имя" />
-        <TextField fx:id="middlename" editable="true" focusTraversable="false" promptText="Отчество" />
+        <TextField fx:id="lastname" editable="true" focusTraversable="false" promptText="Фамилия"/>
+        <TextField fx:id="firstname" editable="true" focusTraversable="false" promptText="Имя"/>
+        <TextField fx:id="middlename" editable="true" focusTraversable="false" promptText="Отчество"/>
+
+        <Button maxWidth="100" onAction="#btnGET" text="Найти" HBox.hgrow="ALWAYS"/>
+        <Button maxWidth="100" onAction="#btnPOST" text="Добавить" HBox.hgrow="ALWAYS"/>
+        <Button maxWidth="100" onAction="#btnPUT" text="Обновить" HBox.hgrow="ALWAYS"/>
+        <Button maxWidth="100" onAction="#btnDELETE" text="Удалить" HBox.hgrow="ALWAYS"/>
     </VBox>
-    <Button maxWidth="80" onAction="#btnGET" text="GET" HBox.hgrow="ALWAYS" />
+        <VBox>
+            <Text>"Ниже отображается Json responce"</Text>
+            <TextField fx:id="result" editable="false" focusTraversable="false"/>
+        </VBox>
+        <VBox>
+            <Text>"Ниже отображается id клиента"</Text>
+            <TextField fx:id="clientId" editable="false" focusTraversable="false"/>
+        </VBox>
+
     <VBox>
-        <Text>"Ниже отображается Json responce"</Text>
-        <TextField fx:id="result" editable="false" focusTraversable="false" />
-    </VBox>
-    <VBox>
-        <Text>"Ниже отображается id клиента"</Text>
-        <TextField fx:id="clientId" editable="false" focusTraversable="false" />
+        <Button maxWidth="180" onAction="#refreshTable" text="Обновить таблицу" HBox.hgrow="ALWAYS"/>
+        <TableView fx:id="table_clients">
+            <columns>
+                <TableColumn fx:id="col_cardNumber" prefWidth="47.0" text="№карты"/>
+                <TableColumn fx:id="col_lastName" prefWidth="62.0" text="Фамилия"/>
+                <TableColumn fx:id="col_firstName" prefWidth="62.0" text="Имя"/>
+                <TableColumn fx:id="col_middleName" prefWidth="75.0" text="Отчество"/>
+            </columns>
+        </TableView>
     </VBox>
 
-    <Button maxWidth="180" onAction="#refreshTable" text="Обновить таблицу" HBox.hgrow="ALWAYS" />
-    <TableView fx:id="table_clients">
-      <columns>
-         <TableColumn fx:id="col_cardNumber" prefWidth="47.0" text="№карты" />
-         <TableColumn fx:id="col_lastName" prefWidth="62.0" text="Фамилия" />
-         <TableColumn fx:id="col_firstName" prefWidth="62.0" text="Имя" />
-         <TableColumn fx:id="col_middleName" prefWidth="75.0" text="Отчество" />
-      </columns>
-    </TableView>
-
-</VBox>
+</HBox>

@@ -1,5 +1,8 @@
 package org.demo.model;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement
 public class ClubClient {
     private int id;
     private int clubCardNumber;
@@ -10,6 +13,13 @@ public class ClubClient {
     public ClubClient() {
     }
 
+    //конструктор для создания клиента через пост запрос
+    public ClubClient(String lastName, String firstName, String middleName) {
+        this.lastName = lastName;
+        this.firstName = firstName;
+        this.middleName = middleName;
+    }
+
     public ClubClient(int id, int clubCardNumber, String lastName, String firstName, String middleName) {
         this.id = id;
         this.clubCardNumber = clubCardNumber;
@@ -18,6 +28,7 @@ public class ClubClient {
         this.middleName = middleName;
     }
 
+    //конструктор без id. для отображения в TableView
     public ClubClient(int clubCardNumber, String lastName, String firstName, String middleName) {
         this.clubCardNumber = clubCardNumber;
         this.lastName = lastName;
