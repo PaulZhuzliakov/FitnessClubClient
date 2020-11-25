@@ -12,11 +12,8 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import org.demo.model.ClubClient;
-
 import javax.ws.rs.client.*;
-
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -24,7 +21,6 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 public class Controller implements Initializable {
-
     @FXML
     TextField lastname;
     @FXML
@@ -35,7 +31,8 @@ public class Controller implements Initializable {
     TextField result;
     @FXML
     TextField clientId;
-
+    @FXML
+    TextField testField;
     @FXML
     TableView<ClubClient> table_clients;
     @FXML
@@ -47,18 +44,23 @@ public class Controller implements Initializable {
     @FXML
     TableColumn<ClubClient, String> col_middleName;
 
+    String server = "http://127.0.0.1:8080";
+    String war = "/api/demo";
+    String getByFIO = "/clients/searchByFIO";
+    String getListByFIO = "/clients/getClientsByFIO";
+
     ObservableList<ClubClient> listOfClients;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        refreshTable();
-    }
-
-    public void refreshTable() {
         col_cardNumber.setCellValueFactory(new PropertyValueFactory<ClubClient, Integer>("clubCardNumber"));
         col_lastName.setCellValueFactory(new PropertyValueFactory<ClubClient, String>("lastName"));
         col_firstName.setCellValueFactory(new PropertyValueFactory<ClubClient, String>("firstName"));
         col_middleName.setCellValueFactory(new PropertyValueFactory<ClubClient, String>("middleName"));
+        refreshTable();
+    }
+
+    public void refreshTable() {
 
         String url = "http://127.0.0.1:8080/api/demo/clients/getAllClients";
         Client client = ClientBuilder.newClient();
@@ -67,7 +69,7 @@ public class Controller implements Initializable {
         ObjectMapper objectMapper = new ObjectMapper();
         ArrayList<ClubClient> listOfMappedClients = null;
         try {
-            listOfMappedClients = objectMapper.readValue(json, new TypeReference<List<ClubClient>>(){});
+            listOfMappedClients = objectMapper.readValue(json, new TypeReference<List<ClubClient>>() {});
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -75,58 +77,12 @@ public class Controller implements Initializable {
         table_clients.setItems(listOfClients);
     }
 
-    String server = "http://127.0.0.1:8080";
-    String war = "/api/demo";
-    String getByFIOMethod = "/clients/searchByFIO";
-    String postByFIOMethod = "/clients//addByFIO";
-
-    //возвращает одного клиента по ФИО, введёным в клиенте
-    public void btnGET(ActionEvent actionEvent) {
-        String filtering = "?lastname=" + lastname.getText() + "&firstname=" + firstname.getText() + "&middlename=" + middlename.getText();
-        String url = "http://127.0.0.1:8080/api/demo/clients/addByFIO";
-
-        String url2 = server + war + getByFIOMethod + filtering;
-
-        Client client = ClientBuilder.newClient();
-        String json = client.target(url).request(MediaType.APPLICATION_JSON).get(String.class);
-        result.setText(json);
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        ClubClient clubClient = null;
-        try {
-            clubClient = objectMapper.readValue(new URL(url), ClubClient.class);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        String id = String.valueOf(clubClient.getId());
-        clientId.setText(id);
-    }
-
-
-    public void btnPOST(ActionEvent actionEvent) {
-
-        ClubClient clubClient = new ClubClient(lastname.getText(), firstname.getText(), middlename.getText());
-        Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://127.0.0.1:8080/api/demo/clients/addByFIO");
-        String response = target.request(MediaType.APPLICATION_JSON)
-                .accept(MediaType.TEXT_PLAIN_TYPE)
-                .post(Entity.json(clubClient), String.class);
-
+//    public void btnGET(ActionEvent actionEvent) throws IOException {
 //        String filtering = "?lastname=" + lastname.getText() + "&firstname=" + firstname.getText() + "&middlename=" + middlename.getText();
-//        String url = server + war + postByFIOMethod + filtering;
+//        String url = server+war+ getByFIO +filtering;
 //
 //        Client client = ClientBuilder.newClient();
-//        WebTarget webTargetURI = client.target(server + war);
-//        WebTarget webTargetAddClient = webTargetURI.path(postByFIOMethod + filtering);
-
-
-
-//        Invocation.Builder invocationBuilder = webTargetAddClient.request(MediaType.APPLICATION_JSON);
-//        ClubClient clubClient = new ClubClient(lastname.getText(), firstname.getText(), middlename.getText());
-//        Response response = invocationBuilder.post(Entity.entity(clubClient, MediaType.APPLICATION_JSON));
-
-
-//        client.target(url).request(MediaType.APPLICATION_JSON);
+//        String json = client.target(url).request(MediaType.APPLICATION_JSON).get(String.class);
 //        result.setText(json);
 //
 //        ObjectMapper objectMapper = new ObjectMapper();
@@ -136,13 +92,64 @@ public class Controller implements Initializable {
 //        } catch (IOException e) {
 //            e.printStackTrace();
 //        }
-//        String id = String.valueOf(clubClient.getId());
-//        clientId.setText(id);
+//        ArrayList<ClubClient> listOfMappedClients = new ArrayList<>();
+//        listOfMappedClients.add(clubClient);
+//        listOfClients = FXCollections.observableArrayList(listOfMappedClients);
+//        table_clients.setItems(listOfClients);
+//    }
+
+    //возвращает список клиентов в JSON по ФИО, введёным в клиенте
+    public void btnGETList(ActionEvent actionEvent) throws IOException {
+        String filtering = "?lastname=" + lastname.getText() + "&firstname=" + firstname.getText() + "&middlename=" + middlename.getText();
+        String url = server+war+ getListByFIO +filtering;
+
+        Client client = ClientBuilder.newClient();
+        String json = client.target(url).request(MediaType.APPLICATION_JSON).get(String.class);
+        result.setText(json);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        ArrayList<ClubClient> listOfMappedClients = null;
+        try {
+            listOfMappedClients = objectMapper.readValue(json, new TypeReference<List<ClubClient>>() {});
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        listOfClients = FXCollections.observableArrayList(listOfMappedClients);
+        table_clients.setItems(listOfClients);
+
+    }
+
+    public void btnPOST(ActionEvent actionEvent) {
+        ClubClient clubClient = new ClubClient(lastname.getText(), firstname.getText(), middlename.getText());
+        Client client = ClientBuilder.newClient();
+        WebTarget target = client.target("http://127.0.0.1:8080/api/demo/clients/addByFIO");
+        target.request(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_PLAIN_TYPE)
+                .post(Entity.json(clubClient), String.class);
+        refreshTable();
     }
 
     public void btnPUT(ActionEvent actionEvent) {
+        TableView.TableViewSelectionModel<ClubClient> selectionModel = table_clients.getSelectionModel();
+        int id = selectionModel.getSelectedItem().getId();
+
+        ClubClient clubClient = new ClubClient(lastname.getText(), firstname.getText(), middlename.getText());
+        Client client = ClientBuilder.newClient();
+        WebTarget target = client.target("http://127.0.0.1:8080/api/demo/clients/update/"+"?id="+id);
+        target.request(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_PLAIN_TYPE)
+                .put(Entity.json(clubClient), String.class);
+        refreshTable();
     }
 
     public void btnDELETE(ActionEvent actionEvent) {
+        TableView.TableViewSelectionModel<ClubClient> selectionModel = table_clients.getSelectionModel();
+        int id = selectionModel.getSelectedItem().getId();
+
+        Client client = ClientBuilder.newClient();
+        WebTarget target = client.target("http://127.0.0.1:8080/api/demo/clients/deleteById/"+id);
+        target.request().delete();
+        refreshTable();
     }
+
 }

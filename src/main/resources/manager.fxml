@@ -13,11 +13,27 @@
         <TextField fx:id="firstname" editable="true" focusTraversable="false" promptText="Имя"/>
         <TextField fx:id="middlename" editable="true" focusTraversable="false" promptText="Отчество"/>
 
-        <Button maxWidth="100" onAction="#btnGET" text="Найти" HBox.hgrow="ALWAYS"/>
+<!--        <Button maxWidth="100" onAction="#btnGET" text="Найти" HBox.hgrow="ALWAYS"/>-->
+        <Button maxWidth="100" onAction="#btnGETList" text="Найти" HBox.hgrow="ALWAYS"/>
         <Button maxWidth="100" onAction="#btnPOST" text="Добавить" HBox.hgrow="ALWAYS"/>
-        <Button maxWidth="100" onAction="#btnPUT" text="Обновить" HBox.hgrow="ALWAYS"/>
+        <Button maxWidth="100" onAction="#btnPUT" text="Редактировать" HBox.hgrow="ALWAYS"/>
         <Button maxWidth="100" onAction="#btnDELETE" text="Удалить" HBox.hgrow="ALWAYS"/>
     </VBox>
+
+
+    <VBox>
+        <Button maxWidth="180" onAction="#refreshTable" text="Обновить таблицу" HBox.hgrow="ALWAYS"/>
+        <TableView fx:id="table_clients">
+            <columns>
+                <TableColumn fx:id="col_cardNumber" prefWidth="60.0" text="№карты"/>
+                <TableColumn fx:id="col_lastName" prefWidth="90.0" text="Фамилия"/>
+                <TableColumn fx:id="col_firstName" prefWidth="90.0" text="Имя"/>
+                <TableColumn fx:id="col_middleName" prefWidth="90.0" text="Отчество"/>
+            </columns>
+        </TableView>
+    </VBox>
+
+    <VBox>
         <VBox>
             <Text>"Ниже отображается Json responce"</Text>
             <TextField fx:id="result" editable="false" focusTraversable="false"/>
@@ -26,17 +42,9 @@
             <Text>"Ниже отображается id клиента"</Text>
             <TextField fx:id="clientId" editable="false" focusTraversable="false"/>
         </VBox>
-
-    <VBox>
-        <Button maxWidth="180" onAction="#refreshTable" text="Обновить таблицу" HBox.hgrow="ALWAYS"/>
-        <TableView fx:id="table_clients">
-            <columns>
-                <TableColumn fx:id="col_cardNumber" prefWidth="47.0" text="№карты"/>
-                <TableColumn fx:id="col_lastName" prefWidth="62.0" text="Фамилия"/>
-                <TableColumn fx:id="col_firstName" prefWidth="62.0" text="Имя"/>
-                <TableColumn fx:id="col_middleName" prefWidth="75.0" text="Отчество"/>
-            </columns>
-        </TableView>
+        <VBox>
+            <Text>"Ниже отображается выделенный элемент кода"</Text>
+            <TextField fx:id="testField" editable="false" focusTraversable="false"/>
+        </VBox>
     </VBox>
-
 </HBox>
