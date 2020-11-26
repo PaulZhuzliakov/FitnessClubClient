@@ -18,6 +18,9 @@
         <Button maxWidth="100" onAction="#btnPOST" text="Добавить" HBox.hgrow="ALWAYS"/>
         <Button maxWidth="100" onAction="#btnPUT" text="Редактировать" HBox.hgrow="ALWAYS"/>
         <Button maxWidth="100" onAction="#btnDELETE" text="Удалить" HBox.hgrow="ALWAYS"/>
+        <Button maxWidth="110" onAction="#btnConfirmVisit" text="Отметить посещение" HBox.hgrow="ALWAYS"/>
+        <Button maxWidth="110" onAction="#btnViewVisits" text="Отобразить посещаемость" HBox.hgrow="ALWAYS"/>
+        <Button maxWidth="110" onAction="#btnCalculateMembershipCard" text="Расчитать абонемент" HBox.hgrow="ALWAYS"/>
     </VBox>
 
 
@@ -46,5 +49,13 @@
             <Text>"Ниже отображается выделенный элемент кода"</Text>
             <TextField fx:id="testField" editable="false" focusTraversable="false"/>
         </VBox>
+    </VBox>
+    <VBox>
+        <Label fx:id="lbl_visit"/>
+        <TableView fx:id="table_attendance" >
+            <columns>
+                <TableColumn fx:id="col_dates" prefWidth="80.0" text="Дата посещения"/>
+            </columns>
+        </TableView>
     </VBox>
 </HBox>
