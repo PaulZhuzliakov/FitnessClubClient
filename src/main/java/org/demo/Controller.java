@@ -12,8 +12,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.StageStyle;
 import org.demo.model.ClubClient;
 import org.demo.model.VisitDate;
-
-import javax.swing.*;
 import javax.ws.rs.client.*;
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
@@ -27,8 +25,6 @@ import java.util.ResourceBundle;
 public class Controller implements Initializable {
     @FXML
     TextField lastname, firstname, middlename;
-    @FXML
-    TextField result, clientId, testField;
     @FXML
     TableView<ClubClient> table_clients;
     @FXML
@@ -51,17 +47,20 @@ public class Controller implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        //инициалицация столбцов таблицы клиентов
         col_cardNumber.setCellValueFactory(new PropertyValueFactory<ClubClient, Integer>("clubCardNumber"));
         col_lastName.setCellValueFactory(new PropertyValueFactory<ClubClient, String>("lastName"));
         col_firstName.setCellValueFactory(new PropertyValueFactory<ClubClient, String>("firstName"));
         col_middleName.setCellValueFactory(new PropertyValueFactory<ClubClient, String>("middleName"));
-
+        //инициалицация столбцов таблицы посещаемости
         col_dates.setCellValueFactory(new PropertyValueFactory<VisitDate, Date>("date"));
         refreshTable();
     }
 
-    public void refreshTable() {
+    //ниже следуют методы для работы с таблицой посещаемости
 
+    //возвращает список всех клиентов и выводит в таблице
+    public void refreshTable() {
         String url = "http://127.0.0.1:8080/api/demo/clients/getAllClients";
         Client client = ClientBuilder.newClient();
         String json = client.target(url).request(MediaType.APPLICATION_JSON).get(String.class);
@@ -76,39 +75,16 @@ public class Controller implements Initializable {
         }
         listOfClients = FXCollections.observableArrayList(listOfMappedClients);
         table_clients.setItems(listOfClients);
+        //добавить логику отсутствия соединения с сервером. а то клиент не запускается, если сервер не ответил
     }
 
-//    public void btnGET(ActionEvent actionEvent) throws IOException {
-//        String filtering = "?lastname=" + lastname.getText() + "&firstname=" + firstname.getText() + "&middlename=" + middlename.getText();
-//        String url = server+war+ getByFIO +filtering;
-//
-//        Client client = ClientBuilder.newClient();
-//        String json = client.target(url).request(MediaType.APPLICATION_JSON).get(String.class);
-//        result.setText(json);
-//
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        ClubClient clubClient = null;
-//        try {
-//            clubClient = objectMapper.readValue(new URL(url), ClubClient.class);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        ArrayList<ClubClient> listOfMappedClients = new ArrayList<>();
-//        listOfMappedClients.add(clubClient);
-//        listOfClients = FXCollections.observableArrayList(listOfMappedClients);
-//        table_clients.setItems(listOfClients);
-//    }
-
-    //возвращает список клиентов в JSON по ФИО, введёным в клиенте
+    //возвращает список клиентов по ФИО, введёным в соответствующих полях и выводит в таблице
     public void btnGETList(ActionEvent actionEvent) throws IOException {
         String filtering = "?lastname=" + lastname.getText() + "&firstname=" + firstname.getText() + "&middlename=" + middlename.getText();
         String url = "http://127.0.0.1:8080/api/demo/clients/getClientsByFIO" + filtering;
-//        String url = server+war+ getListByFIO +filtering;
-        testField.setText(url);
 
         Client client = ClientBuilder.newClient();
         String json = client.target(url).request(MediaType.APPLICATION_JSON).get(String.class);
-        result.setText(json);
 
         ObjectMapper objectMapper = new ObjectMapper();
         ArrayList<ClubClient> listOfMappedClients = null;
@@ -118,11 +94,12 @@ public class Controller implements Initializable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        //вывод в таблице
         listOfClients = FXCollections.observableArrayList(listOfMappedClients);
         table_clients.setItems(listOfClients);
-
     }
 
+    //отправляет данные о пользователе, которого надо создать по ФИО, введёным в соответствующих полях
     public void btnPOST(ActionEvent actionEvent) {
         ClubClient clubClient = new ClubClient(lastname.getText(), firstname.getText(), middlename.getText());
         Client client = ClientBuilder.newClient();
@@ -133,6 +110,8 @@ public class Controller implements Initializable {
         refreshTable();
     }
 
+    //отправляет данные о пользователе, которого надо редактировать
+    //меняет у уже имеющегося пользователя ФИО, введёные в соответствующих полях
     public void btnPUT(ActionEvent actionEvent) {
         TableView.TableViewSelectionModel<ClubClient> selectionModel = table_clients.getSelectionModel();
         int id = selectionModel.getSelectedItem().getId();
@@ -146,6 +125,7 @@ public class Controller implements Initializable {
         refreshTable();
     }
 
+    //удаляет выделенного пользователя
     public void btnDELETE(ActionEvent actionEvent) {
         TableView.TableViewSelectionModel<ClubClient> selectionModel = table_clients.getSelectionModel();
         int id = selectionModel.getSelectedItem().getId();
@@ -156,6 +136,10 @@ public class Controller implements Initializable {
         refreshTable();
     }
 
+
+    //ниже следуют методы для работы с таблицой посещаемости
+
+    //выбрать клиента в таблице клиентов и отобразить в таблице посещаемости данные о датах посещения выбранного клиента
     public void btnConfirmVisit(ActionEvent actionEvent) {
         int id = table_clients.getSelectionModel().getSelectedItem().getId();
         java.sql.Date currentDate = new java.sql.Date(Calendar.getInstance().getTime().getTime());
@@ -168,6 +152,7 @@ public class Controller implements Initializable {
                 .post(Entity.json(visitDate), String.class);
     }
 
+    //отобразить в таблице посещений, даты посещения выбранного клиента
     public void btnViewVisits(ActionEvent actionEvent) {
         int id = table_clients.getSelectionModel().getSelectedItem().getId();
         String filtering = "?id=" + id;
@@ -175,7 +160,6 @@ public class Controller implements Initializable {
 
         Client client = ClientBuilder.newClient();
         String json = client.target(url).request(MediaType.APPLICATION_JSON).get(String.class);
-        result.setText(json);
 
         ObjectMapper objectMapper = new ObjectMapper();
         ArrayList<VisitDate> listOfMappedDates = null;
@@ -187,27 +171,15 @@ public class Controller implements Initializable {
         listOfVisitDates = FXCollections.observableArrayList(listOfMappedDates);
         table_attendance.setItems(listOfVisitDates);
 
-        String txt = table_clients.getSelectionModel().getSelectedItem().getLastName();
+        String txt = table_clients.getSelectionModel().getSelectedItem().getLastName() + " "
+                + table_clients.getSelectionModel().getSelectedItem().getFirstName();
         lbl_visit.setText(txt);
 
     }
 
+    //расчет стоимости нового абонемента, исходя из количества посещений за прошедший год начиная с сегодняшнего дня
+    //ужасно написано. переписать!
     public void btnCalculateMembershipCard(ActionEvent actionEvent) {
-//        String sql = "SELECT * FROM attendance WHERE client_id = 1 and date >= (NOW() - INTERVAL '365 DAYS')";
-//        try (Connection connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/fitness_club", "postgres", "postgres");
-//             Statement statement = connection.createStatement()) {
-//            ResultSet resultSet = statement.executeQuery(sql);
-//            int count = 0;
-//            while (resultSet.next()) {
-//                count++;
-//            }
-//            testField.setText(String.valueOf(count));
-//            testField.setText(String.valueOf(count));
-//        } catch (Exception e) {
-//            System.out.println(e);
-//        }
-
-
         int id = table_clients.getSelectionModel().getSelectedItem().getId();
         String filtering = "?id=" + id;
         String url = "http://127.0.0.1:8080/api/demo/clients/calcMembershipCard" + filtering;
@@ -232,13 +204,10 @@ public class Controller implements Initializable {
         } else {
             discount = 15;
         }
-
-
-
         //Цена абонемента без скидки
         int cost = 20_000;
         String msg = "Количество посещений за прошедший год состовляет " + number + " дней"
-         + "\n" + "Стоимость нового абонемента составляет: " + (cost * 1-(1-discount)) + " рублей";
+                + "\n" + "Стоимость нового абонемента составляет: " + (cost * 1-(1-discount)) + " рублей";
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.initStyle(StageStyle.UTILITY);
         alert.setTitle("Рассчет стоимости абонемента");
@@ -247,4 +216,3 @@ public class Controller implements Initializable {
         alert.showAndWait();
     }
 }
-
