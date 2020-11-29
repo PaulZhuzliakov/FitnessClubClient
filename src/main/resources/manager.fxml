@@ -4,48 +4,53 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<HBox alignment="TOP_LEFT" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1"
+<VBox alignment="TOP_LEFT" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="org.demo.Controller">
+    <HBox>
+        <VBox>
+            <Text>"Введите ФИО клиента"</Text>
+            <TextField fx:id="lastname" editable="true" focusTraversable="false" promptText="Фамилия"/>
+            <TextField fx:id="firstname" editable="true" focusTraversable="false" promptText="Имя"/>
+            <TextField fx:id="middlename" editable="true" focusTraversable="false" promptText="Отчество"/>
 
-    <VBox>
-        <Text>"Введите ФИО клиента"</Text>
-        <TextField fx:id="lastname" editable="true" focusTraversable="false" promptText="Фамилия"/>
-        <TextField fx:id="firstname" editable="true" focusTraversable="false" promptText="Имя"/>
-        <TextField fx:id="middlename" editable="true" focusTraversable="false" promptText="Отчество"/>
+            <Label text=""/>
+            <Label text=" Управление клиентом"/>
+            <Button maxWidth="100" onAction="#btnGETList" text="Найти" HBox.hgrow="ALWAYS"/>
+            <Button maxWidth="100" onAction="#btnPOST" text="Добавить" HBox.hgrow="ALWAYS"/>
+            <Button maxWidth="100" onAction="#btnPUT" text="Редактировать" HBox.hgrow="ALWAYS"/>
+            <Button maxWidth="100" onAction="#btnDELETE" text="Удалить" HBox.hgrow="ALWAYS"/>
 
-        <Label text=""/>
-        <Label text=" Управление клиентом"/>
-        <Button maxWidth="100" onAction="#btnGETList" text="Найти" HBox.hgrow="ALWAYS"/>
-        <Button maxWidth="100" onAction="#btnPOST" text="Добавить" HBox.hgrow="ALWAYS"/>
-        <Button maxWidth="100" onAction="#btnPUT" text="Редактировать" HBox.hgrow="ALWAYS"/>
-        <Button maxWidth="100" onAction="#btnDELETE" text="Удалить" HBox.hgrow="ALWAYS"/>
+            <Label text=""/>
+            <Label text=" Управление датами посещения "/>
+            <Button maxWidth="170" onAction="#btnConfirmVisit" text="Отметить посещение" HBox.hgrow="ALWAYS"/>
+            <Button maxWidth="170" onAction="#btnViewVisits" text="Отобразить посещаемость" HBox.hgrow="ALWAYS"/>
+            <Button maxWidth="170" onAction="#btnCalculateMembershipCard" text="Расчитать абонемент"
+                    HBox.hgrow="ALWAYS"/>
+        </VBox>
 
-        <Label text=""/>
-        <Label text=" Управление датами посещения "/>
-        <Button maxWidth="170" onAction="#btnConfirmVisit" text="Отметить посещение" HBox.hgrow="ALWAYS"/>
-        <Button maxWidth="170" onAction="#btnViewVisits" text="Отобразить посещаемость" HBox.hgrow="ALWAYS"/>
-        <Button maxWidth="170" onAction="#btnCalculateMembershipCard" text="Расчитать абонемент" HBox.hgrow="ALWAYS"/>
-    </VBox>
+        <VBox>
+            <Button maxWidth="180" onAction="#refreshTable" text="Обновить таблицу" HBox.hgrow="ALWAYS"/>
+            <TableView fx:id="table_clients">
+                <columns>
+                    <TableColumn fx:id="col_cardNumber" prefWidth="60.0" text="№карты"/>
+                    <TableColumn fx:id="col_lastName" prefWidth="90.0" text="Фамилия"/>
+                    <TableColumn fx:id="col_firstName" prefWidth="90.0" text="Имя"/>
+                    <TableColumn fx:id="col_middleName" prefWidth="90.0" text="Отчество"/>
+                </columns>
+            </TableView>
+        </VBox>
 
-
-    <VBox>
-        <Button maxWidth="180" onAction="#refreshTable" text="Обновить таблицу" HBox.hgrow="ALWAYS"/>
-        <TableView fx:id="table_clients">
-            <columns>
-                <TableColumn fx:id="col_cardNumber" prefWidth="60.0" text="№карты"/>
-                <TableColumn fx:id="col_lastName" prefWidth="90.0" text="Фамилия"/>
-                <TableColumn fx:id="col_firstName" prefWidth="90.0" text="Имя"/>
-                <TableColumn fx:id="col_middleName" prefWidth="90.0" text="Отчество"/>
-            </columns>
-        </TableView>
-    </VBox>
-
-    <VBox>
-        <Label fx:id="lbl_visit"/>
-        <TableView fx:id="table_attendance" >
-            <columns>
-                <TableColumn fx:id="col_dates" prefWidth="80.0" text="Даты посещения"/>
-            </columns>
-        </TableView>
-    </VBox>
-</HBox>
+        <VBox>
+            <Label fx:id="lbl_visit"/>
+            <TableView fx:id="table_attendance">
+                <columns>
+                    <TableColumn fx:id="col_dates" prefWidth="80.0" text="Даты посещения"/>
+                </columns>
+            </TableView>
+        </VBox>
+    </HBox>
+    <Label text=""/>
+    <Label text="Записать в БД нужное кол-во посещений начиная с сегодняшнего дня"/>
+    <TextField fx:id="testField" editable="true" maxWidth="150" promptText="Количество посещений"/>
+    <Button maxWidth="170" onAction="#btnTestButton" text="Добавить посещения" HBox.hgrow="ALWAYS"/>
+</VBox>

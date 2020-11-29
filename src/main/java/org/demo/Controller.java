@@ -12,19 +12,19 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.StageStyle;
 import org.demo.model.ClubClient;
 import org.demo.model.VisitDate;
+
 import javax.ws.rs.client.*;
 import javax.ws.rs.core.MediaType;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.ResourceBundle;
+import java.sql.Date;
+import java.util.*;
 
 public class Controller implements Initializable {
     @FXML
-    TextField lastname, firstname, middlename;
+    TextField lastname, firstname, middlename, testField;
     @FXML
     TableView<ClubClient> table_clients;
     @FXML
@@ -37,16 +37,22 @@ public class Controller implements Initializable {
     TableColumn<VisitDate, Date> col_dates;
     @FXML
     Label lbl_visit;
-    String server = "http://127.0.0.1:8080";
-    String war = "/api/demo";
-    String getByFIO = "/clients/searchByFIO";
-    String getListByFIO = "/clients/getClientsByFIO";
+
+    String server;
+    String service;
+    String clients;
+    String getByFio;
+    String visits;
+    String getYearVisits;
+    String tests;
+    int membershipCardCost;
 
     ObservableList<ClubClient> listOfClients;
     ObservableList<VisitDate> listOfVisitDates;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        setProperties();
         //инициалицация столбцов таблицы клиентов
         col_cardNumber.setCellValueFactory(new PropertyValueFactory<ClubClient, Integer>("clubCardNumber"));
         col_lastName.setCellValueFactory(new PropertyValueFactory<ClubClient, String>("lastName"));
@@ -57,12 +63,30 @@ public class Controller implements Initializable {
         refreshTable();
     }
 
-    //ниже следуют методы для работы с таблицой посещаемости
+    public void setProperties() {
+        try (FileReader reader = new FileReader("src/main/resources/config.properties")) {
+            Properties properties = new Properties();
+            properties.load(reader);
+            server = properties.getProperty("server");
+            service = properties.getProperty("service");
+            clients = properties.getProperty("clients");
+            getByFio = properties.getProperty("getByFio");
+            visits = properties.getProperty("visits");
+            getYearVisits = properties.getProperty("getYearVisits");
+            tests = properties.getProperty("tests");
+            membershipCardCost = Integer.valueOf(properties.getProperty("membershipCardCost"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    //ниже следуют методы для работы с таблицой клиентов
 
     //возвращает список всех клиентов и выводит в таблице
     public void refreshTable() {
-        String url = "http://127.0.0.1:8080/api/demo/clients/getAllClients";
         Client client = ClientBuilder.newClient();
+        String url = server + service + clients;
         String json = client.target(url).request(MediaType.APPLICATION_JSON).get(String.class);
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -80,30 +104,48 @@ public class Controller implements Initializable {
 
     //возвращает список клиентов по ФИО, введёным в соответствующих полях и выводит в таблице
     public void btnGETList(ActionEvent actionEvent) throws IOException {
+
         String filtering = "?lastname=" + lastname.getText() + "&firstname=" + firstname.getText() + "&middlename=" + middlename.getText();
-        String url = "http://127.0.0.1:8080/api/demo/clients/getClientsByFIO" + filtering;
+        if (new String(lastname.getText() + firstname.getText() + middlename.getText()).equals("")) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.initStyle(StageStyle.UTILITY);
+            alert.setHeaderText("Клиент не найден1");
+            alert.setContentText("Проверьте корректность введеных данных");
+            alert.showAndWait();
+        } else {
+            String url = server + service + clients + getByFio + filtering;
 
-        Client client = ClientBuilder.newClient();
-        String json = client.target(url).request(MediaType.APPLICATION_JSON).get(String.class);
+            Client client = ClientBuilder.newClient();
+            String json = client.target(url).request(MediaType.APPLICATION_JSON).get(String.class);
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        ArrayList<ClubClient> listOfMappedClients = null;
-        try {
-            listOfMappedClients = objectMapper.readValue(json, new TypeReference<List<ClubClient>>() {
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
+            ObjectMapper objectMapper = new ObjectMapper();
+            ArrayList<ClubClient> listOfMappedClients = null;
+            try {
+                listOfMappedClients = objectMapper.readValue(json, new TypeReference<List<ClubClient>>() {
+                });
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (listOfMappedClients.isEmpty()) {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.initStyle(StageStyle.UTILITY);
+                alert.setHeaderText("Нет данных для поиска");
+                alert.setContentText("Заполните хотя бы оин параметр для поиска");
+                alert.showAndWait();
+            } else {
+                //вывод в таблице
+                listOfClients = FXCollections.observableArrayList(listOfMappedClients);
+                table_clients.setItems(listOfClients);
+            }
         }
-        //вывод в таблице
-        listOfClients = FXCollections.observableArrayList(listOfMappedClients);
-        table_clients.setItems(listOfClients);
     }
 
     //отправляет данные о пользователе, которого надо создать по ФИО, введёным в соответствующих полях
     public void btnPOST(ActionEvent actionEvent) {
         ClubClient clubClient = new ClubClient(lastname.getText(), firstname.getText(), middlename.getText());
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://127.0.0.1:8080/api/demo/clients/addByFIO");
+        String url = server + service + clients;
+        WebTarget target = client.target(url);
         target.request(MediaType.APPLICATION_JSON)
                 .accept(MediaType.TEXT_PLAIN_TYPE)
                 .post(Entity.json(clubClient), String.class);
@@ -118,7 +160,8 @@ public class Controller implements Initializable {
 
         ClubClient clubClient = new ClubClient(lastname.getText(), firstname.getText(), middlename.getText());
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://127.0.0.1:8080/api/demo/clients/update/" + "?id=" + id);
+        String url = server + service + clients+id;
+        WebTarget target = client.target(url);
         target.request(MediaType.APPLICATION_JSON)
                 .accept(MediaType.TEXT_PLAIN_TYPE)
                 .put(Entity.json(clubClient), String.class);
@@ -129,9 +172,9 @@ public class Controller implements Initializable {
     public void btnDELETE(ActionEvent actionEvent) {
         TableView.TableViewSelectionModel<ClubClient> selectionModel = table_clients.getSelectionModel();
         int id = selectionModel.getSelectedItem().getId();
-
+        String url = server + service + clients + id;
         Client client = ClientBuilder.newClient();
-        WebTarget target = client.target("http://127.0.0.1:8080/api/demo/clients/deleteById/" + id);
+        WebTarget target = client.target(url);
         target.request().delete();
         refreshTable();
     }
@@ -143,7 +186,7 @@ public class Controller implements Initializable {
     public void btnConfirmVisit(ActionEvent actionEvent) {
         int id = table_clients.getSelectionModel().getSelectedItem().getId();
         java.sql.Date currentDate = new java.sql.Date(Calendar.getInstance().getTime().getTime());
-        String url = "http://127.0.0.1:8080/api/demo/clients/confirmClientVisit";
+        String url = server + service + visits;
         VisitDate visitDate = new VisitDate(id, currentDate);
         Client client = ClientBuilder.newClient();
         WebTarget target = client.target(url);
@@ -155,8 +198,7 @@ public class Controller implements Initializable {
     //отобразить в таблице посещений, даты посещения выбранного клиента
     public void btnViewVisits(ActionEvent actionEvent) {
         int id = table_clients.getSelectionModel().getSelectedItem().getId();
-        String filtering = "?id=" + id;
-        String url = "http://127.0.0.1:8080/api/demo/clients/viewVisits" + filtering;
+        String url = server + service + visits + id;
 
         Client client = ClientBuilder.newClient();
         String json = client.target(url).request(MediaType.APPLICATION_JSON).get(String.class);
@@ -164,7 +206,8 @@ public class Controller implements Initializable {
         ObjectMapper objectMapper = new ObjectMapper();
         ArrayList<VisitDate> listOfMappedDates = null;
         try {
-            listOfMappedDates = objectMapper.readValue(json, new TypeReference<List<VisitDate>>() {});
+            listOfMappedDates = objectMapper.readValue(json, new TypeReference<List<VisitDate>>() {
+            });
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -178,41 +221,63 @@ public class Controller implements Initializable {
     }
 
     //расчет стоимости нового абонемента, исходя из количества посещений за прошедший год начиная с сегодняшнего дня
-    //ужасно написано. переписать!
     public void btnCalculateMembershipCard(ActionEvent actionEvent) {
-        int id = table_clients.getSelectionModel().getSelectedItem().getId();
-        String filtering = "?id=" + id;
-        String url = "http://127.0.0.1:8080/api/demo/clients/calcMembershipCard" + filtering;
-
-        Client client = ClientBuilder.newClient();
-        String json = client.target(url).request(MediaType.APPLICATION_JSON).get(String.class);
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        int number = 0;
-        try {
-            number = objectMapper.readValue(json, Integer.class);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        int percentage = (number/365)*100;
-
-        int discount;
-        if (percentage<35) {
-            discount = 0;
-        } else if (percentage>=35&&percentage<60){
-            discount = 10;
+        if (table_clients.getSelectionModel().isEmpty()) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.initStyle(StageStyle.UTILITY);
+            alert.setTitle("Ошибка");
+            alert.setHeaderText("Клиент не выбран");
+            alert.setContentText("Выделите клиента в таблице и попробуёте ещё раз");
+            alert.showAndWait();
         } else {
-            discount = 15;
-        }
-        //Цена абонемента без скидки
-        int cost = 20_000;
-        String msg = "Количество посещений за прошедший год состовляет " + number + " дней"
-                + "\n" + "Стоимость нового абонемента составляет: " + (cost * 1-(1-discount)) + " рублей";
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.initStyle(StageStyle.UTILITY);
-        alert.setTitle("Рассчет стоимости абонемента");
+            int id = table_clients.getSelectionModel().getSelectedItem().getId();
+            String url = server + service + visits + getYearVisits + id;
+
+            Client client = ClientBuilder.newClient();
+            String json = client.target(url).request(MediaType.APPLICATION_JSON).get(String.class);
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            int visitsInYear = 0;
+            try {
+                visitsInYear = objectMapper.readValue(json, Integer.class);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            float percentage = (float) visitsInYear / 365 * 100;
+            int cost;
+            int discount;
+            if (percentage < 35) {
+                discount = 0;
+                cost = membershipCardCost;
+            } else if (percentage >= 35 && percentage < 60) {
+                discount = 10;
+                cost = (int) (membershipCardCost * 0.9);
+            } else {
+                discount = 15;
+                cost = (int) (membershipCardCost * 0.85);
+            }
+
+            String msg = "Количество посещений за прошедший год состовляет " + visitsInYear + " дней"
+                    + "\n" + "Это " + String.format("%.0f", percentage) + " % дней за прошедший год"
+                    + "\n" + "Ваша скидка составляет составляет: " + discount + " %"
+                    + "\n" + "Стоимость нового абонемента составляет: " + cost + " рублей";
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.initStyle(StageStyle.UTILITY);
+            alert.setTitle("Рассчет стоимости абонемента");
 //        alert.setHeaderText("HeaderText");
-        alert.setContentText(msg);
-        alert.showAndWait();
+            alert.setContentText(msg);
+            alert.showAndWait();
+        }
+    }
+
+    //добавить в БД требуемое количество посещений для клиента по его id
+    public void btnTestButton(ActionEvent actionEvent) {
+        int id = table_clients.getSelectionModel().getSelectedItem().getId();
+        int repeats = Integer.parseInt(testField.getText());
+        String filtering = "?id=" + id + "&days=" + repeats;
+        String url = server + service + tests + filtering;
+        Client client = ClientBuilder.newClient();
+        client.target(url).request(MediaType.APPLICATION_JSON).get(String.class);
+
     }
 }
