@@ -12,6 +12,8 @@
             <TextField fx:id="lastname" editable="true" focusTraversable="false" promptText="Фамилия"/>
             <TextField fx:id="firstname" editable="true" focusTraversable="false" promptText="Имя"/>
             <TextField fx:id="middlename" editable="true" focusTraversable="false" promptText="Отчество"/>
+            <TextField fx:id="phonenumber" editable="true" focusTraversable="false" promptText="Телефон"/>
+            <TextField fx:id="email" editable="true" focusTraversable="false" promptText="E-mail"/>
 
             <Label text=""/>
             <Label text=" Управление клиентом"/>
@@ -36,6 +38,8 @@
                     <TableColumn fx:id="col_lastName" prefWidth="90.0" text="Фамилия"/>
                     <TableColumn fx:id="col_firstName" prefWidth="90.0" text="Имя"/>
                     <TableColumn fx:id="col_middleName" prefWidth="90.0" text="Отчество"/>
+                    <TableColumn fx:id="col_phoneNumber" prefWidth="90.0" text="Телефон"/>
+                    <TableColumn fx:id="col_eMail" prefWidth="90.0" text="Почта"/>
                 </columns>
             </TableView>
         </VBox>
@@ -50,7 +54,8 @@
         </VBox>
     </HBox>
     <Label text=""/>
+    <Label text="Ниже находятся поля разработчика для тестирования. Убрать из релизной версии)"/>
     <Label text="Записать в БД нужное кол-во посещений начиная с сегодняшнего дня"/>
-    <TextField fx:id="testField" editable="true" maxWidth="150" promptText="Количество посещений"/>
+    <TextField fx:id="testField" editable="true" maxWidth="450" promptText="Количество посещений"/>
     <Button maxWidth="170" onAction="#btnTestButton" text="Добавить посещения" HBox.hgrow="ALWAYS"/>
 </VBox>

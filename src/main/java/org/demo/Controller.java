@@ -18,19 +18,21 @@ import javax.ws.rs.core.MediaType;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
-import java.sql.*;
 import java.sql.Date;
 import java.util.*;
 
 public class Controller implements Initializable {
     @FXML
-    TextField lastname, firstname, middlename, testField;
+    TextField lastname, firstname, middlename, phonenumber, email, testField;
     @FXML
     TableView<ClubClient> table_clients;
     @FXML
     TableColumn<ClubClient, Integer> col_cardNumber;
     @FXML
-    TableColumn<ClubClient, String> col_lastName, col_firstName, col_middleName;
+    TableColumn<ClubClient, String> col_lastName, col_firstName, col_middleName,
+            col_phoneNumber;
+    @FXML
+    TableColumn<ClubClient, String> col_eMail;
     @FXML
     TableView<VisitDate> table_attendance;
     @FXML
@@ -58,6 +60,8 @@ public class Controller implements Initializable {
         col_lastName.setCellValueFactory(new PropertyValueFactory<ClubClient, String>("lastName"));
         col_firstName.setCellValueFactory(new PropertyValueFactory<ClubClient, String>("firstName"));
         col_middleName.setCellValueFactory(new PropertyValueFactory<ClubClient, String>("middleName"));
+        col_phoneNumber.setCellValueFactory(new PropertyValueFactory<ClubClient, String>("phoneNumber"));
+        col_eMail.setCellValueFactory(new PropertyValueFactory<ClubClient, String>("mail"));
         //инициалицация столбцов таблицы посещаемости
         col_dates.setCellValueFactory(new PropertyValueFactory<VisitDate, Date>("date"));
         refreshTable();
@@ -104,45 +108,38 @@ public class Controller implements Initializable {
 
     //возвращает список клиентов по ФИО, введёным в соответствующих полях и выводит в таблице
     public void btnGETList(ActionEvent actionEvent) throws IOException {
+        String filtering = "?lastname=" + lastname.getText() + "&firstname=" + firstname.getText() +
+                "&middlename=" + middlename.getText() + "&phonenumber=" + phonenumber.getText() +
+                "&email=" + email.getText();
 
-        String filtering = "?lastname=" + lastname.getText() + "&firstname=" + firstname.getText() + "&middlename=" + middlename.getText();
-        if (new String(lastname.getText() + firstname.getText() + middlename.getText()).equals("")) {
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.initStyle(StageStyle.UTILITY);
-            alert.setHeaderText("Клиент не найден1");
-            alert.setContentText("Проверьте корректность введеных данных");
-            alert.showAndWait();
-        } else {
-            String url = server + service + clients + getByFio + filtering;
+        String url = server + service + clients + getByFio + filtering;
 
-            Client client = ClientBuilder.newClient();
-            String json = client.target(url).request(MediaType.APPLICATION_JSON).get(String.class);
+        Client client = ClientBuilder.newClient();
+        String json = client.target(url).request(MediaType.APPLICATION_JSON).get(String.class);
+        testField.setText(filtering);
 
-            ObjectMapper objectMapper = new ObjectMapper();
-            ArrayList<ClubClient> listOfMappedClients = null;
-            try {
-                listOfMappedClients = objectMapper.readValue(json, new TypeReference<List<ClubClient>>() {
-                });
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            if (listOfMappedClients.isEmpty()) {
-                Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                alert.initStyle(StageStyle.UTILITY);
-                alert.setHeaderText("Нет данных для поиска");
-                alert.setContentText("Заполните хотя бы оин параметр для поиска");
-                alert.showAndWait();
-            } else {
-                //вывод в таблице
-                listOfClients = FXCollections.observableArrayList(listOfMappedClients);
-                table_clients.setItems(listOfClients);
-            }
+        ObjectMapper objectMapper = new ObjectMapper();
+        ArrayList<ClubClient> listOfMappedClients = null;
+        try {
+            listOfMappedClients = objectMapper.readValue(json, new TypeReference<List<ClubClient>>() {
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+//            if (listOfMappedClients.isEmpty()) {
+//                Alerts.showEmptyFieldsAlert();
+//            } else {
+        //вывод в таблице
+        listOfClients = FXCollections.observableArrayList(listOfMappedClients);
+        table_clients.setItems(listOfClients);
+//            }
+
     }
 
     //отправляет данные о пользователе, которого надо создать по ФИО, введёным в соответствующих полях
     public void btnPOST(ActionEvent actionEvent) {
-        ClubClient clubClient = new ClubClient(lastname.getText(), firstname.getText(), middlename.getText());
+        ClubClient clubClient = new ClubClient(lastname.getText(), firstname.getText(), middlename.getText(),
+                phonenumber.getText(), email.getText());
         Client client = ClientBuilder.newClient();
         String url = server + service + clients;
         WebTarget target = client.target(url);
@@ -157,10 +154,10 @@ public class Controller implements Initializable {
     public void btnPUT(ActionEvent actionEvent) {
         TableView.TableViewSelectionModel<ClubClient> selectionModel = table_clients.getSelectionModel();
         int id = selectionModel.getSelectedItem().getId();
-
-        ClubClient clubClient = new ClubClient(lastname.getText(), firstname.getText(), middlename.getText());
+        ClubClient clubClient = new ClubClient(lastname.getText(), firstname.getText(), middlename.getText(),
+                phonenumber.getText(), email.getText());
         Client client = ClientBuilder.newClient();
-        String url = server + service + clients+id;
+        String url = server + service + clients + id;
         WebTarget target = client.target(url);
         target.request(MediaType.APPLICATION_JSON)
                 .accept(MediaType.TEXT_PLAIN_TYPE)
@@ -199,10 +196,8 @@ public class Controller implements Initializable {
     public void btnViewVisits(ActionEvent actionEvent) {
         int id = table_clients.getSelectionModel().getSelectedItem().getId();
         String url = server + service + visits + id;
-
         Client client = ClientBuilder.newClient();
         String json = client.target(url).request(MediaType.APPLICATION_JSON).get(String.class);
-
         ObjectMapper objectMapper = new ObjectMapper();
         ArrayList<VisitDate> listOfMappedDates = null;
         try {
@@ -214,6 +209,7 @@ public class Controller implements Initializable {
         listOfVisitDates = FXCollections.observableArrayList(listOfMappedDates);
         table_attendance.setItems(listOfVisitDates);
 
+        //Отображать имя и фамилию над таблицей посещения
         String txt = table_clients.getSelectionModel().getSelectedItem().getLastName() + " "
                 + table_clients.getSelectionModel().getSelectedItem().getFirstName();
         lbl_visit.setText(txt);
@@ -222,52 +218,40 @@ public class Controller implements Initializable {
 
     //расчет стоимости нового абонемента, исходя из количества посещений за прошедший год начиная с сегодняшнего дня
     public void btnCalculateMembershipCard(ActionEvent actionEvent) {
-        if (table_clients.getSelectionModel().isEmpty()) {
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.initStyle(StageStyle.UTILITY);
-            alert.setTitle("Ошибка");
-            alert.setHeaderText("Клиент не выбран");
-            alert.setContentText("Выделите клиента в таблице и попробуёте ещё раз");
-            alert.showAndWait();
-        } else {
-            int id = table_clients.getSelectionModel().getSelectedItem().getId();
-            String url = server + service + visits + getYearVisits + id;
-
-            Client client = ClientBuilder.newClient();
-            String json = client.target(url).request(MediaType.APPLICATION_JSON).get(String.class);
-
-            ObjectMapper objectMapper = new ObjectMapper();
-            int visitsInYear = 0;
-            try {
-                visitsInYear = objectMapper.readValue(json, Integer.class);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            float percentage = (float) visitsInYear / 365 * 100;
-            int cost;
-            int discount;
-            if (percentage < 35) {
-                discount = 0;
-                cost = membershipCardCost;
-            } else if (percentage >= 35 && percentage < 60) {
-                discount = 10;
-                cost = (int) (membershipCardCost * 0.9);
-            } else {
-                discount = 15;
-                cost = (int) (membershipCardCost * 0.85);
-            }
-
-            String msg = "Количество посещений за прошедший год состовляет " + visitsInYear + " дней"
-                    + "\n" + "Это " + String.format("%.0f", percentage) + " % дней за прошедший год"
-                    + "\n" + "Ваша скидка составляет составляет: " + discount + " %"
-                    + "\n" + "Стоимость нового абонемента составляет: " + cost + " рублей";
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.initStyle(StageStyle.UTILITY);
-            alert.setTitle("Рассчет стоимости абонемента");
-//        alert.setHeaderText("HeaderText");
-            alert.setContentText(msg);
-            alert.showAndWait();
+        int id = table_clients.getSelectionModel().getSelectedItem().getId();
+        String url = server + service + visits + getYearVisits + id;
+        Client client = ClientBuilder.newClient();
+        String json = client.target(url).request(MediaType.APPLICATION_JSON).get(String.class);
+        ObjectMapper objectMapper = new ObjectMapper();
+        int visitsInYear = 0;
+        try {
+            visitsInYear = objectMapper.readValue(json, Integer.class);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+        float percentage = (float) visitsInYear / 365 * 100;
+        int cost;
+        int discount;
+        if (percentage < 35) {
+            discount = 0;
+            cost = membershipCardCost;
+        } else if (percentage >= 35 && percentage < 60) {
+            discount = 10;
+            cost = (int) (membershipCardCost * 0.9);
+        } else {
+            discount = 15;
+            cost = (int) (membershipCardCost * 0.85);
+        }
+
+        String msg = "Количество посещений за прошедший год состовляет " + visitsInYear + " дней"
+                + "\n" + "Это " + String.format("%.0f", percentage) + " % дней за прошедший год"
+                + "\n" + "Ваша скидка составляет составляет: " + discount + " %"
+                + "\n" + "Стоимость нового абонемента составляет: " + cost + " рублей";
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.initStyle(StageStyle.UTILITY);
+        alert.setTitle("Рассчет стоимости абонемента");
+        alert.setContentText(msg);
+        alert.showAndWait();
     }
 
     //добавить в БД требуемое количество посещений для клиента по его id
