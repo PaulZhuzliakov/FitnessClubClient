@@ -1,4 +1,4 @@
-package org.demo;
+package org.demo.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -9,7 +9,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.stage.StageStyle;
+import org.demo.Alerts;
 import org.demo.model.ClubClient;
 import org.demo.model.VisitDate;
 
@@ -23,16 +23,13 @@ import java.util.*;
 
 public class Controller implements Initializable {
     @FXML
-    TextField lastname, firstname, middlename, phonenumber, email, testField;
+    TextField lastname, firstname, middlename, phonenumber, email, testField, testField2;
     @FXML
     TableView<ClubClient> table_clients;
     @FXML
     TableColumn<ClubClient, Integer> col_cardNumber;
     @FXML
-    TableColumn<ClubClient, String> col_lastName, col_firstName, col_middleName,
-            col_phoneNumber;
-    @FXML
-    TableColumn<ClubClient, String> col_eMail;
+    TableColumn<ClubClient, String> col_lastName, col_firstName, col_middleName, col_phoneNumber, col_eMail;
     @FXML
     TableView<VisitDate> table_attendance;
     @FXML
@@ -43,18 +40,17 @@ public class Controller implements Initializable {
     String server;
     String service;
     String clients;
-    String getByFio;
+    String searchClients;
     String visits;
     String getYearVisits;
     String tests;
     int membershipCardCost;
 
-    ObservableList<ClubClient> listOfClients;
     ObservableList<VisitDate> listOfVisitDates;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        setProperties();
+        getProperties();
         //инициалицация столбцов таблицы клиентов
         col_cardNumber.setCellValueFactory(new PropertyValueFactory<ClubClient, Integer>("clubCardNumber"));
         col_lastName.setCellValueFactory(new PropertyValueFactory<ClubClient, String>("lastName"));
@@ -67,14 +63,14 @@ public class Controller implements Initializable {
         refreshTable();
     }
 
-    public void setProperties() {
+    public void getProperties() {
         try (FileReader reader = new FileReader("src/main/resources/config.properties")) {
             Properties properties = new Properties();
             properties.load(reader);
             server = properties.getProperty("server");
             service = properties.getProperty("service");
             clients = properties.getProperty("clients");
-            getByFio = properties.getProperty("getByFio");
+            searchClients = properties.getProperty("searchClients");
             visits = properties.getProperty("visits");
             getYearVisits = properties.getProperty("getYearVisits");
             tests = properties.getProperty("tests");
@@ -87,23 +83,31 @@ public class Controller implements Initializable {
 
     //ниже следуют методы для работы с таблицой клиентов
 
-    //возвращает список всех клиентов и выводит в таблице
-    public void refreshTable() {
+    //вспомогательный метод для GET запросов
+    void populateClientTable(String url) {
         Client client = ClientBuilder.newClient();
-        String url = server + service + clients;
         String json = client.target(url).request(MediaType.APPLICATION_JSON).get(String.class);
-
         ObjectMapper objectMapper = new ObjectMapper();
         ArrayList<ClubClient> listOfMappedClients = null;
         try {
             listOfMappedClients = objectMapper.readValue(json, new TypeReference<List<ClubClient>>() {
             });
-        } catch (IOException e) {
+            ObservableList<ClubClient> listOfClients;
+            listOfClients = FXCollections.observableArrayList(listOfMappedClients);
+            table_clients.setItems(listOfClients);
+        } catch (
+                IOException e) {
             e.printStackTrace();
         }
-        listOfClients = FXCollections.observableArrayList(listOfMappedClients);
-        table_clients.setItems(listOfClients);
-        //добавить логику отсутствия соединения с сервером. а то клиент не запускается, если сервер не ответил
+
+        testField.setText(url);
+        testField2.setText(json);
+    }
+
+    //возвращает список всех клиентов и выводит в таблице
+    public void refreshTable() {
+        String url = server + service + clients;
+        populateClientTable(url);
     }
 
     //возвращает список клиентов по ФИО, введёным в соответствующих полях и выводит в таблице
@@ -111,29 +115,8 @@ public class Controller implements Initializable {
         String filtering = "?lastname=" + lastname.getText() + "&firstname=" + firstname.getText() +
                 "&middlename=" + middlename.getText() + "&phonenumber=" + phonenumber.getText() +
                 "&email=" + email.getText();
-
-        String url = server + service + clients + getByFio + filtering;
-
-        Client client = ClientBuilder.newClient();
-        String json = client.target(url).request(MediaType.APPLICATION_JSON).get(String.class);
-        testField.setText(filtering);
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        ArrayList<ClubClient> listOfMappedClients = null;
-        try {
-            listOfMappedClients = objectMapper.readValue(json, new TypeReference<List<ClubClient>>() {
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-//            if (listOfMappedClients.isEmpty()) {
-//                Alerts.showEmptyFieldsAlert();
-//            } else {
-        //вывод в таблице
-        listOfClients = FXCollections.observableArrayList(listOfMappedClients);
-        table_clients.setItems(listOfClients);
-//            }
-
+        String url = server + service + clients + searchClients + filtering;
+        populateClientTable(url);
     }
 
     //отправляет данные о пользователе, которого надо создать по ФИО, введёным в соответствующих полях
@@ -156,6 +139,7 @@ public class Controller implements Initializable {
         int id = selectionModel.getSelectedItem().getId();
         ClubClient clubClient = new ClubClient(lastname.getText(), firstname.getText(), middlename.getText(),
                 phonenumber.getText(), email.getText());
+
         Client client = ClientBuilder.newClient();
         String url = server + service + clients + id;
         WebTarget target = client.target(url);
@@ -164,6 +148,7 @@ public class Controller implements Initializable {
                 .put(Entity.json(clubClient), String.class);
         refreshTable();
     }
+
 
     //удаляет выделенного пользователя
     public void btnDELETE(ActionEvent actionEvent) {
@@ -181,10 +166,9 @@ public class Controller implements Initializable {
 
     //выбрать клиента в таблице клиентов и отобразить в таблице посещаемости данные о датах посещения выбранного клиента
     public void btnConfirmVisit(ActionEvent actionEvent) {
-        int id = table_clients.getSelectionModel().getSelectedItem().getId();
-        java.sql.Date currentDate = new java.sql.Date(Calendar.getInstance().getTime().getTime());
+        int Clientid = table_clients.getSelectionModel().getSelectedItem().getId();
         String url = server + service + visits;
-        VisitDate visitDate = new VisitDate(id, currentDate);
+        VisitDate visitDate = new VisitDate(Clientid);
         Client client = ClientBuilder.newClient();
         WebTarget target = client.target(url);
         target.request(MediaType.APPLICATION_JSON)
@@ -203,15 +187,17 @@ public class Controller implements Initializable {
         try {
             listOfMappedDates = objectMapper.readValue(json, new TypeReference<List<VisitDate>>() {
             });
+            listOfVisitDates = FXCollections.observableArrayList(listOfMappedDates);
+            table_attendance.setItems(listOfVisitDates);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        listOfVisitDates = FXCollections.observableArrayList(listOfMappedDates);
-        table_attendance.setItems(listOfVisitDates);
 
         //Отображать имя и фамилию над таблицей посещения
-        String txt = table_clients.getSelectionModel().getSelectedItem().getLastName() + " "
-                + table_clients.getSelectionModel().getSelectedItem().getFirstName();
+        StringBuilder builder = new StringBuilder();
+        builder.append(table_clients.getSelectionModel().getSelectedItem().getLastName()).append(" ")
+                .append(table_clients.getSelectionModel().getSelectedItem().getFirstName());
+        String txt = builder.toString();
         lbl_visit.setText(txt);
 
     }
@@ -242,17 +228,17 @@ public class Controller implements Initializable {
             discount = 15;
             cost = (int) (membershipCardCost * 0.85);
         }
-
-        String msg = "Количество посещений за прошедший год состовляет " + visitsInYear + " дней"
-                + "\n" + "Это " + String.format("%.0f", percentage) + " % дней за прошедший год"
-                + "\n" + "Ваша скидка составляет составляет: " + discount + " %"
-                + "\n" + "Стоимость нового абонемента составляет: " + cost + " рублей";
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.initStyle(StageStyle.UTILITY);
-        alert.setTitle("Рассчет стоимости абонемента");
-        alert.setContentText(msg);
-        alert.showAndWait();
+        //String.format("%.0f", percentage) - норм?
+        StringBuilder builder = new StringBuilder();
+        builder.append("Количество посещений за прошедший год состовляет ").append(visitsInYear).append(" дней").append("\n")
+                .append("Это ").append(String.format("%.0f", percentage)).append(" % дней за прошедший год").append("\n")
+                .append("Ваша скидка составляет составляет: ").append(discount).append(" %").append("\n")
+                .append("Стоимость нового абонемента составляет: ").append(cost).append(" рублей");
+        String alertMsg = builder.toString();
+        Alerts.showAlert("Рассчет стоимости абонемента", alertMsg);
     }
+
+    //ниже функционал для тестирования. будет убран из релизной версии)
 
     //добавить в БД требуемое количество посещений для клиента по его id
     public void btnTestButton(ActionEvent actionEvent) {
@@ -262,6 +248,9 @@ public class Controller implements Initializable {
         String url = server + service + tests + filtering;
         Client client = ClientBuilder.newClient();
         client.target(url).request(MediaType.APPLICATION_JSON).get(String.class);
+    }
 
+    public void btnTestButton2(ActionEvent actionEvent) {
+        testField2.setText(lastname.getText());
     }
 }

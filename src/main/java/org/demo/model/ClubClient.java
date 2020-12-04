@@ -15,17 +15,7 @@ public class ClubClient {
     public ClubClient() {
     }
 
-    public ClubClient(int id, int clubCardNumber, String lastName, String firstName, String middleName, String phoneNumber, String mail) {
-        this.id = id;
-        this.clubCardNumber = clubCardNumber;
-        this.lastName = lastName;
-        this.firstName = firstName;
-        this.middleName = middleName;
-        this.phoneNumber = phoneNumber;
-        this.mail = mail;
-    }
-
-//конструктор без id и номера клубной карты для создания клиента через пост запрос
+    //конструктор без id и номера клубной карты для создания клиента через POST запрос
     public ClubClient(String lastName, String firstName, String middleName, String phoneNumber, String mail) {
         this.lastName = lastName;
         this.firstName = firstName;
@@ -35,19 +25,18 @@ public class ClubClient {
     }
 
     //конструктор без id. для отображения в TableView
-
     public ClubClient(int clubCardNumber, String lastName, String firstName, String middleName, String phoneNumber, String mail) {
+        this(lastName, firstName, middleName, phoneNumber, mail);
         this.clubCardNumber = clubCardNumber;
-        this.lastName = lastName;
-        this.firstName = firstName;
-        this.middleName = middleName;
-        this.phoneNumber = phoneNumber;
-        this.mail = mail;
     }
 
+    //конструктор со всеми параметрами
+    public ClubClient(int id, int clubCardNumber, String lastName, String firstName, String middleName, String phoneNumber, String mail) {
+        this(clubCardNumber, lastName, firstName, middleName, phoneNumber, mail);
+        this.id = id;
+    }
 
     //getters and setters
-
     public int getId() {
         return id;
     }

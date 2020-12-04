@@ -5,7 +5,7 @@
 <?import javafx.scene.text.*?>
 
 <VBox alignment="TOP_LEFT" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="org.demo.Controller">
+      fx:controller="org.demo.controller.Controller">
     <HBox>
         <VBox>
             <Text>"Введите ФИО клиента"</Text>
@@ -58,4 +58,6 @@
     <Label text="Записать в БД нужное кол-во посещений начиная с сегодняшнего дня"/>
     <TextField fx:id="testField" editable="true" maxWidth="450" promptText="Количество посещений"/>
     <Button maxWidth="170" onAction="#btnTestButton" text="Добавить посещения" HBox.hgrow="ALWAYS"/>
+    <TextField fx:id="testField2" editable="true" maxWidth="450" promptText="Еще одно поле для тестирования"/>
+    <Button maxWidth="170" onAction="#btnTestButton2" text="Вызвать метод" HBox.hgrow="ALWAYS"/>
 </VBox>

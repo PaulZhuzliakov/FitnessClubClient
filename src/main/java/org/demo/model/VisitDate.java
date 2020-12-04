@@ -15,13 +15,20 @@ public class VisitDate {
     //задаёт текущую дату
     public VisitDate(int clientId) {
         this.clientId = clientId;
+
+        //this.date = new java.sql.Date(Calendar.getInstance().getTime().getTime());
         this.date = new java.sql.Date(Calendar.getInstance().getTime().getTime());
     }
 
+    //для метода отмечающего сегодняшнее посещение по id клиента
     public VisitDate(int clientId, Date date) {
         this.clientId = clientId;
-        this.date = date;
     }
+
+//    public VisitDate(int clientId, Date date) {
+//        this.clientId = clientId;
+//        this.date = date;
+//    }
 
     public int getClientId() {
         return clientId;
