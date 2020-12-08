@@ -106,16 +106,16 @@ public class Controller implements Initializable {
 
     //возвращает список всех клиентов и выводит в таблице
     public void refreshTable() {
-        String url = new StringBuilder().append(server).append(service).append(clients).toString();
+        String url = new StringBuilder(server).append(service).append(clients).toString();
         populateClientTable(url);
     }
 
-    //возвращает список клиентов по ФИО, введёным в соответствующих полях и выводит в таблице
+    //возвращает список клиентов по параметрам, введёным в соответствующих полях и выводит в таблице
     public void btnGETList(ActionEvent actionEvent) throws IOException {
-        String filtering = "?lastname=" + lastname.getText() + "&firstname=" + firstname.getText() +
-                "&middlename=" + middlename.getText() + "&phonenumber=" + phonenumber.getText() +
-                "&email=" + email.getText();
-        String url = new StringBuilder().append(server).append(service).append(clients).append(searchClients).append(filtering).toString();
+        String filtering = new StringBuilder("?lastname=").append(lastname.getText()).append("&firstname=").append(firstname.getText())
+                .append("&middlename=").append(middlename.getText()).append("&phonenumber=").append(phonenumber.getText())
+                .append("&email=").append(email.getText()).toString();
+        String url = new StringBuilder(server).append(service).append(clients).append(searchClients).append(filtering).toString();
         populateClientTable(url);
     }
 
@@ -140,7 +140,7 @@ public class Controller implements Initializable {
     public void btnPOST(ActionEvent actionEvent) {
         ClubClient clubClient = new ClubClient(lastname.getText(), firstname.getText(), middlename.getText(),
                 phonenumber.getText(), email.getText());
-        String url = new StringBuilder().append(server).append(service).append(clients).toString();
+        String url = new StringBuilder(server).append(service).append(clients).toString();
         WebTarget target = client.target(url);
         target.request(MediaType.APPLICATION_JSON)
                 .accept(MediaType.TEXT_PLAIN_TYPE)
@@ -154,7 +154,7 @@ public class Controller implements Initializable {
         int id = getIdOfSelectedClient();
         ClubClient clubClient = new ClubClient(lastname.getText(), firstname.getText(), middlename.getText(),
                 phonenumber.getText(), email.getText());
-        String url = new StringBuilder().append(server).append(service).append(clients).append(id).toString();
+        String url = new StringBuilder(server).append(service).append(clients).append(id).toString();
         WebTarget target = client.target(url);
         target.request(MediaType.APPLICATION_JSON)
                 .accept(MediaType.TEXT_PLAIN_TYPE)
@@ -165,7 +165,7 @@ public class Controller implements Initializable {
     //удаляет выделенного пользователя по id
     public void btnDELETE(ActionEvent actionEvent) {
         int id = getIdOfSelectedClient();
-        String url = new StringBuilder().append(server).append(service).append(clients).append(id).toString();
+        String url = new StringBuilder(server).append(service).append(clients).append(id).toString();
         WebTarget target = client.target(url);
         target.request().delete();
         refreshTable();
@@ -177,7 +177,7 @@ public class Controller implements Initializable {
     //выбрать клиента в таблице клиентов и отобразить в таблице посещаемости данные о датах посещения выбранного клиента
     public void btnConfirmVisit(ActionEvent actionEvent) {
         int id = getIdOfSelectedClient();
-        String url = new StringBuilder().append(server).append(service).append(visits).toString();
+        String url = new StringBuilder(server).append(service).append(visits).toString();
         VisitDate visitDate = new VisitDate(id);
         WebTarget target = client.target(url);
         target.request(MediaType.APPLICATION_JSON)
@@ -188,13 +188,11 @@ public class Controller implements Initializable {
     //отобразить в таблице посещений, даты посещения выбранного клиента
     public void btnViewVisits(ActionEvent actionEvent) {
         int id = getIdOfSelectedClient();
-        String url = new StringBuilder().append(server).append(service).append(visits).append(id).toString();
+        String url = new StringBuilder(server).append(service).append(visits).append(id).toString();
         populateVisitTable(url);
         //Отображать имя и фамилию над таблицей посещения
-        StringBuilder builder = new StringBuilder();
-        builder.append(table_clients.getSelectionModel().getSelectedItem().getLastName()).append(" ")
-                .append(table_clients.getSelectionModel().getSelectedItem().getFirstName());
-        String txt = builder.toString();
+        String txt = new StringBuilder(table_clients.getSelectionModel().getSelectedItem().getLastName()).append(" ")
+                .append(table_clients.getSelectionModel().getSelectedItem().getFirstName()).toString();
         lbl_visit.setText(txt);
     }
 
@@ -217,8 +215,8 @@ public class Controller implements Initializable {
     public void btnCalculateMembershipCard(ActionEvent actionEvent) {
         int id = getIdOfSelectedClient();
         int periodOfDays = 365;
-        String filtering = new StringBuilder().append("?id=").append(id).append("&days=").append(periodOfDays).toString();
-        String url = new StringBuilder().append(server).append(service).append(visits)
+        String filtering = new StringBuilder("?id=").append(id).append("&days=").append(periodOfDays).toString();
+        String url = new StringBuilder(server).append(service).append(visits)
                 .append(getVisitsForPeriod).append(filtering).toString();
         testField.setText(url);
         String json = client.target(url).request(MediaType.APPLICATION_JSON).get(String.class);
@@ -263,8 +261,8 @@ public class Controller implements Initializable {
         int id = getIdOfSelectedClient();
         int repeats = Integer.parseInt(testField.getText());
         //нужно значение. день с которого начинается
-        String filtering = new StringBuilder().append("?id=").append(id).append("&days=").append(repeats).toString();
-        String url = new StringBuilder().append(server).append(service).append(tests).append(filtering).toString();
+        String filtering = new StringBuilder("?id=").append(id).append("&days=").append(repeats).toString();
+        String url = new StringBuilder(server).append(service).append(tests).append(filtering).toString();
         client.target(url).request(MediaType.APPLICATION_JSON).get(String.class);
     }
 
