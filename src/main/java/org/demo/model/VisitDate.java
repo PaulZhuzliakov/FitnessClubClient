@@ -1,7 +1,7 @@
 package org.demo.model;
 
-import java.sql.Date;
 import java.time.LocalDate;
+import java.sql.Date;
 
 public class VisitDate {
     int clientId;
@@ -14,7 +14,13 @@ public class VisitDate {
     public VisitDate(int clientId) {
         this.clientId = clientId;
         this.date = Date.valueOf(LocalDate.now());
+//        this.date = DateTimeFormatter.ISO_LOCAL_DATE.format(LocalDate.now());
     }
+
+//    public VisitDate(int clientId, Date date) {
+//        this.clientId = clientId;
+//        this.date = date;
+//    }
 
     public int getClientId() {
         return clientId;

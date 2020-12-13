@@ -19,7 +19,6 @@ import javax.ws.rs.core.MediaType;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
-import java.sql.Date;
 import java.util.*;
 
 public class Controller implements Initializable {
@@ -41,7 +40,6 @@ public class Controller implements Initializable {
     String server;
     String service;
     String clients;
-    String searchClients;
     String visits;
     String getVisitsForPeriod;
     String tests;
@@ -72,7 +70,6 @@ public class Controller implements Initializable {
             server = ConfigInit.getProperty("server");
             service = ConfigInit.getProperty("service");
             clients = ConfigInit.getProperty("clients");
-            searchClients = ConfigInit.getProperty("searchClients");
             visits = ConfigInit.getProperty("visits");
             getVisitsForPeriod = ConfigInit.getProperty("getYearVisits");
             tests = ConfigInit.getProperty("tests");
@@ -112,12 +109,26 @@ public class Controller implements Initializable {
 
     //возвращает список клиентов по параметрам, введёным в соответствующих полях и выводит в таблице
     public void btnGETList(ActionEvent actionEvent) throws IOException {
-        String filtering = new StringBuilder("?lastname=").append(lastname.getText()).append("&firstname=").append(firstname.getText())
-                .append("&middlename=").append(middlename.getText()).append("&phonenumber=").append(phonenumber.getText())
-                .append("&email=").append(email.getText()).toString();
-        String url = new StringBuilder(server).append(service).append(clients).append(searchClients).append(filtering).toString();
-        populateClientTable(url);
+        if (lastname.getText().equals("") && firstname.getText().equals("") && middlename.getText().equals("")
+                && phonenumber.getText().equals("") && email.getText().equals(""))
+            Alerts.showAlert("Нет данных для поиска", "Заполните хотя бы одно поле для поиска");
+        else {
+            String filtering = new StringBuilder("?lastname=").append(lastname.getText()).append("&firstname=").append(firstname.getText())
+                    .append("&middlename=").append(middlename.getText()).append("&phonenumber=").append(phonenumber.getText())
+                    .append("&email=").append(email.getText()).toString();
+            String url = new StringBuilder(server).append(service).append(clients).append(filtering).toString();
+            populateClientTable(url);
+        }
     }
+
+//    //возвращает список клиентов по параметрам, введёным в соответствующих полях и выводит в таблице
+//    public void btnGETList(ActionEvent actionEvent) throws IOException {
+//        String filtering = new StringBuilder("?lastname=").append(lastname.getText()).append("&firstname=").append(firstname.getText())
+//                .append("&middlename=").append(middlename.getText()).append("&phonenumber=").append(phonenumber.getText())
+//                .append("&email=").append(email.getText()).toString();
+//        String url = new StringBuilder(server).append(service).append(clients).append(filtering).toString();
+//        populateClientTable(url);
+//    }
 
     //не смог сделать общий параметризированный метод для заполнения таблий клиентов и посещений(
     void populateClientTable(String url) {
@@ -149,7 +160,7 @@ public class Controller implements Initializable {
     }
 
     //отправляет данные о пользователе, которого надо редактировать
-    //меняет у уже имеющегося пользователя ФИО, введёные в соответствующих полях
+    //меняет параметры у уже имеющегося пользователя, введёные в соответствующих полях
     public void btnPUT(ActionEvent actionEvent) {
         int id = getIdOfSelectedClient();
         ClubClient clubClient = new ClubClient(lastname.getText(), firstname.getText(), middlename.getText(),
@@ -198,6 +209,9 @@ public class Controller implements Initializable {
 
     void populateVisitTable(String url) {
         String json = client.target(url).request(MediaType.APPLICATION_JSON).get(String.class);
+        //
+        testField.setText(json);
+        testField2.setText(url);
         ObjectMapper objectMapper = new ObjectMapper();
         ArrayList<VisitDate> listOfMappedDates = null;
         try {

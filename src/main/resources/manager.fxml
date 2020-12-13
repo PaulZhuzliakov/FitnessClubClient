@@ -8,7 +8,7 @@
       fx:controller="org.demo.controller.Controller">
     <HBox>
         <VBox>
-            <Text>"Введите ФИО клиента"</Text>
+            <Text>"Введите данные клиента"</Text>
             <TextField fx:id="lastname" editable="true" focusTraversable="false" promptText="Фамилия"/>
             <TextField fx:id="firstname" editable="true" focusTraversable="false" promptText="Имя"/>
             <TextField fx:id="middlename" editable="true" focusTraversable="false" promptText="Отчество"/>
