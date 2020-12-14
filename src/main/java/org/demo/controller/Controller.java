@@ -19,6 +19,7 @@ import javax.ws.rs.core.MediaType;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
+import java.time.LocalDate;
 import java.util.*;
 
 public class Controller implements Initializable {
@@ -33,7 +34,8 @@ public class Controller implements Initializable {
     @FXML
     TableView<VisitDate> table_attendance;
     @FXML
-    TableColumn<VisitDate, Date> col_dates;
+    TableColumn<VisitDate, LocalDate> col_dates;
+
     @FXML
     Label lbl_visit;
 
@@ -59,7 +61,7 @@ public class Controller implements Initializable {
         col_phoneNumber.setCellValueFactory(new PropertyValueFactory<ClubClient, String>("phoneNumber"));
         col_eMail.setCellValueFactory(new PropertyValueFactory<ClubClient, String>("mail"));
         //инициалицация столбцов таблицы посещаемости
-        col_dates.setCellValueFactory(new PropertyValueFactory<VisitDate, Date>("date"));
+        col_dates.setCellValueFactory(new PropertyValueFactory<VisitDate, LocalDate>("date"));
         refreshTable();
     }
 
@@ -189,7 +191,8 @@ public class Controller implements Initializable {
     public void btnConfirmVisit(ActionEvent actionEvent) {
         int id = getIdOfSelectedClient();
         String url = new StringBuilder(server).append(service).append(visits).toString();
-        VisitDate visitDate = new VisitDate(id);
+        LocalDate today = LocalDate.now();
+        VisitDate visitDate = new VisitDate(id, today);
         WebTarget target = client.target(url);
         target.request(MediaType.APPLICATION_JSON)
                 .accept(MediaType.TEXT_PLAIN_TYPE)

@@ -1,26 +1,24 @@
 package org.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+
 import java.time.LocalDate;
-import java.sql.Date;
 
 public class VisitDate {
     int clientId;
-    Date date;
+    LocalDate date;
 
     public VisitDate() {
     }
 
-    //для метода отмечающего сегодняшнее посещение по id клиента
-    public VisitDate(int clientId) {
+    public VisitDate(int clientId, LocalDate date) {
         this.clientId = clientId;
-        this.date = Date.valueOf(LocalDate.now());
-//        this.date = DateTimeFormatter.ISO_LOCAL_DATE.format(LocalDate.now());
+        this.date = date;
     }
-
-//    public VisitDate(int clientId, Date date) {
-//        this.clientId = clientId;
-//        this.date = date;
-//    }
 
     public int getClientId() {
         return clientId;
@@ -30,11 +28,15 @@ public class VisitDate {
         this.clientId = clientId;
     }
 
-    public Date getDate() {
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
+    @JsonDeserialize(using = LocalDateDeserializer.class)
+    @JsonSerialize(using = LocalDateSerializer.class)
+    public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 }
