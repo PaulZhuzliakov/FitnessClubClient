@@ -26,7 +26,7 @@
             <Label text=" Управление датами посещения "/>
             <Button maxWidth="170" onAction="#btnConfirmVisit" text="Отметить посещение" HBox.hgrow="ALWAYS"/>
             <Button maxWidth="170" onAction="#btnViewVisits" text="Отобразить посещаемость" HBox.hgrow="ALWAYS"/>
-            <Button maxWidth="170" onAction="#btnCalculateMembershipCard" text="Расчитать абонемент"
+            <Button maxWidth="170" onAction="#btnCalculateMembershipCardCost" text="Расчитать абонемент"
                     HBox.hgrow="ALWAYS"/>
         </VBox>
 

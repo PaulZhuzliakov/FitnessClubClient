@@ -12,6 +12,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import org.demo.Alerts;
 import org.demo.ConfigInit;
 import org.demo.model.ClubClient;
+import org.demo.model.MembershipCardCost;
 import org.demo.model.VisitDate;
 
 import javax.ws.rs.client.*;
@@ -45,7 +46,9 @@ public class Controller implements Initializable {
     String visits;
     String getVisitsForPeriod;
     String tests;
-    int membershipCardCost;
+    String cardCost;
+//    int membershipCardCost;
+
 
     Client client = ClientBuilder.newClient();
 
@@ -73,9 +76,9 @@ public class Controller implements Initializable {
             service = ConfigInit.getProperty("service");
             clients = ConfigInit.getProperty("clients");
             visits = ConfigInit.getProperty("visits");
+            cardCost = ConfigInit.getProperty("cardCost");
             getVisitsForPeriod = ConfigInit.getProperty("getYearVisits");
             tests = ConfigInit.getProperty("tests");
-            membershipCardCost = Integer.valueOf(ConfigInit.getProperty("membershipCardCost"));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -98,10 +101,11 @@ public class Controller implements Initializable {
 //        }
 //    }
 
+    int getIdOfSelectedClient() {
+        return table_clients.getSelectionModel().getSelectedItem().getId();
+    }
 
     //ниже следуют методы для работы с таблицой клиентов
-
-    //вспомогательный метод для GET запросов
 
     //возвращает список всех клиентов и выводит в таблице
     public void refreshTable() {
@@ -228,47 +232,30 @@ public class Controller implements Initializable {
         }
     }
 
-    //расчет стоимости нового абонемента, исходя из количества посещений за прошедший год начиная с сегодняшнего дня
-    public void btnCalculateMembershipCard(ActionEvent actionEvent) {
+    //расчет стоимости нового абонемента, исходя из количества посещений за прошедший год, начиная с сегодняшнего дня
+    public void btnCalculateMembershipCardCost(ActionEvent actionEvent) {
         int id = getIdOfSelectedClient();
-        int periodOfDays = 365;
-        String filtering = new StringBuilder("?id=").append(id).append("&days=").append(periodOfDays).toString();
-        String url = new StringBuilder(server).append(service).append(visits)
-                .append(getVisitsForPeriod).append(filtering).toString();
-        testField.setText(url);
+        String url = new StringBuilder(server).append(service).append(cardCost).append(id).toString();
         String json = client.target(url).request(MediaType.APPLICATION_JSON).get(String.class);
-        testField2.setText(json);
         ObjectMapper objectMapper = new ObjectMapper();
-        int visitsInLastPeriodOfDays = 0;
+        MembershipCardCost card = null;
         try {
-            visitsInLastPeriodOfDays = objectMapper.readValue(json, Integer.class);
-        } catch (IOException e) {
+            card = objectMapper.readValue(json, new TypeReference<MembershipCardCost>() {
+            });
+        } catch (
+                IOException e) {
             e.printStackTrace();
         }
-        float percentageOfVisitsInLastPeriodOfDays = (float) visitsInLastPeriodOfDays / periodOfDays * 100;
-        int membershipCardCostWithDiscount;
-        int discount;
-        if (percentageOfVisitsInLastPeriodOfDays < 35) {
-            discount = 0;
-            membershipCardCostWithDiscount = membershipCardCost;
-        } else if (percentageOfVisitsInLastPeriodOfDays >= 35 && percentageOfVisitsInLastPeriodOfDays < 60) {
-            discount = 10;
-            membershipCardCostWithDiscount = (int) (membershipCardCost * 0.9);
-        } else {
-            discount = 15;
-            membershipCardCostWithDiscount = (int) (membershipCardCost * 0.85);
-        }
         StringBuilder sb = new StringBuilder();
-        sb.append("Количество посещений за прошедший год состовляет ").append(visitsInLastPeriodOfDays).append(" дней").append("\n")
-                .append("Это ").append(String.format("%.0f", percentageOfVisitsInLastPeriodOfDays)).append(" % дней за прошедший год").append("\n")
-                .append("Ваша скидка составляет составляет: ").append(discount).append(" %").append("\n")
-                .append("Стоимость нового абонемента составляет: ").append(membershipCardCostWithDiscount).append(" рублей");
-        String alertMsg = sb.toString();
-        Alerts.showAlert("Рассчет стоимости абонемента", alertMsg);
-    }
-
-    int getIdOfSelectedClient() {
-        return table_clients.getSelectionModel().getSelectedItem().getId();
+        sb.append("Количество посещений за прошедший год состовляет ")
+                .append(card.getDaysVisitedInPeriodOfTime()).append(" дней").append("\n")
+                .append("Это ").append(String.format("%.0f", card.getPercentageOfVisitedDaysInPeriodOfTime()))
+                .append(" % дней за прошедший год").append("\n")
+                .append("Ваша скидка составляет составляет: ").append(card.getDiscount()).append(" %").append("\n")
+                .append("Стоимость нового абонемента с учётом скидки составляет: ")
+                .append(card.getMembershipCardCostWithDiscount()).append(" рублей");
+        String msg = sb.toString();
+        Alerts.showAlert("Рассчет стоимости абонемента", msg);
     }
 
     //ниже функционал для тестирования. будет убран из релизной версии)
@@ -276,9 +263,8 @@ public class Controller implements Initializable {
     //добавить в БД требуемое количество посещений для клиента по его id
     public void btnTestButton(ActionEvent actionEvent) {
         int id = getIdOfSelectedClient();
-        int repeats = Integer.parseInt(testField.getText());
-        //нужно значение. день с которого начинается
-        String filtering = new StringBuilder("?id=").append(id).append("&days=").append(repeats).toString();
+        int days = Integer.parseInt(testField.getText());
+        String filtering = new StringBuilder("?id=").append(id).append("&days=").append(days).toString();
         String url = new StringBuilder(server).append(service).append(tests).append(filtering).toString();
         client.target(url).request(MediaType.APPLICATION_JSON).get(String.class);
     }
