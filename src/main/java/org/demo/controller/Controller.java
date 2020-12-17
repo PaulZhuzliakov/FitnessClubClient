@@ -10,11 +10,9 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import org.demo.Alerts;
-import org.demo.ConfigInit;
 import org.demo.model.ClubClient;
 import org.demo.model.MembershipCardCost;
 import org.demo.model.VisitDate;
-
 import javax.ws.rs.client.*;
 import javax.ws.rs.core.MediaType;
 import java.io.FileReader;
@@ -46,11 +44,8 @@ public class Controller implements Initializable {
     String visits;
     String cardCost;
     String tests;
-//    String getVisitsForPeriod;
-
 
     Client client = ClientBuilder.newClient();
-
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -71,33 +66,16 @@ public class Controller implements Initializable {
         try (FileReader reader = new FileReader("src/main/resources/config.properties")) {
             Properties properties = new Properties();
             properties.load(reader);
-            server = ConfigInit.getProperty("server");
-            service = ConfigInit.getProperty("service");
-            clients = ConfigInit.getProperty("clients");
-            visits = ConfigInit.getProperty("visits");
-            cardCost = ConfigInit.getProperty("cardCost");
-            tests = ConfigInit.getProperty("tests");
+            server = properties.getProperty("server");
+            service = properties.getProperty("service");
+            clients = properties.getProperty("clients");
+            visits = properties.getProperty("visits");
+            cardCost = properties.getProperty("cardCost");
+            tests = properties.getProperty("tests");
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
-//    public void initProperties() {
-//        try (FileReader reader = new FileReader("src/main/resources/config.properties")) {
-//            Properties properties = new Properties();
-//            properties.load(reader);
-//            server = properties.getProperty("server");
-//            service = properties.getProperty("service");
-//            clients = properties.getProperty("clients");
-//            searchClients = properties.getProperty("searchClients");
-//            visits = properties.getProperty("visits");
-//            getVisitsForPeriod = properties.getProperty("getYearVisits");
-//            tests = properties.getProperty("tests");
-//            membershipCardCost = Integer.valueOf(properties.getProperty("membershipCardCost"));
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
 
     int getIdOfSelectedClient() {
         return table_clients.getSelectionModel().getSelectedItem().getId();
