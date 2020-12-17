@@ -24,13 +24,15 @@ public class ClubClient {
     //конструктор без id. для отображения в TableView
     public ClubClient(int clubCardNumber, String lastName, String firstName, String middleName, String phoneNumber, String mail) {
         this(lastName, firstName, middleName, phoneNumber, mail);
-        this.clubCardNumber = clubCardNumber;
+//        this.clubCardNumber = clubCardNumber;
+        setClubCardNumber(clubCardNumber);
     }
 
     //конструктор со всеми параметрами
     public ClubClient(int id, int clubCardNumber, String lastName, String firstName, String middleName, String phoneNumber, String mail) {
         this(clubCardNumber, lastName, firstName, middleName, phoneNumber, mail);
-        this.id = id;
+//        this.id = id;
+        setId(id);
     }
 
     //getters and setters

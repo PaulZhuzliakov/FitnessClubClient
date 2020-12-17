@@ -8,6 +8,19 @@ public class MembershipCardCost {
     int discount;
     int membershipCardCostWithDiscount;
 
+    public MembershipCardCost() {
+    }
+
+    public MembershipCardCost(int periodOfTimeInDays, int daysVisitedInPeriodOfTime, float percentageOfVisitedDaysInPeriodOfTime,
+                              int membershipCardCostWithoutDiscount, int discount, int membershipCardCostWithDiscount) {
+        this.periodOfTimeInDays = periodOfTimeInDays;
+        this.daysVisitedInPeriodOfTime = daysVisitedInPeriodOfTime;
+        this.percentageOfVisitedDaysInPeriodOfTime = percentageOfVisitedDaysInPeriodOfTime;
+        this.membershipCardCostWithoutDiscount = membershipCardCostWithoutDiscount;
+        this.discount = discount;
+        this.membershipCardCostWithDiscount = membershipCardCostWithDiscount;
+    }
+
     public int getPeriodOfTimeInDays() {
         return periodOfTimeInDays;
     }

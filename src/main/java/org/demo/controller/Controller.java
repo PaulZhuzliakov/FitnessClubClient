@@ -44,10 +44,9 @@ public class Controller implements Initializable {
     String service;
     String clients;
     String visits;
-    String getVisitsForPeriod;
-    String tests;
     String cardCost;
-//    int membershipCardCost;
+    String tests;
+//    String getVisitsForPeriod;
 
 
     Client client = ClientBuilder.newClient();
@@ -77,7 +76,6 @@ public class Controller implements Initializable {
             clients = ConfigInit.getProperty("clients");
             visits = ConfigInit.getProperty("visits");
             cardCost = ConfigInit.getProperty("cardCost");
-            getVisitsForPeriod = ConfigInit.getProperty("getYearVisits");
             tests = ConfigInit.getProperty("tests");
         } catch (Exception e) {
             e.printStackTrace();

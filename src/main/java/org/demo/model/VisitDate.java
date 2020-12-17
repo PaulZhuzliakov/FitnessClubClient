@@ -20,6 +20,7 @@ public class VisitDate {
         this.date = date;
     }
 
+
     public int getClientId() {
         return clientId;
     }
