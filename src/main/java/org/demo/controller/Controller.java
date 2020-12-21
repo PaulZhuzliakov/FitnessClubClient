@@ -92,9 +92,9 @@ public class Controller implements Initializable {
 
     //возвращает список клиентов по параметрам, введёным в соответствующих полях и выводит в таблице
     public void btnGETList(ActionEvent actionEvent) throws IOException {
-        if (lastname.getText().equals("") && firstname.getText().equals("") && middlename.getText().equals("")
-                && phonenumber.getText().equals("") && email.getText().equals(""))
-            Alerts.showAlert("Нет данных для поиска", "Заполните хотя бы одно поле для поиска");
+        if (lastname.getText().equals("") || firstname.getText().equals("") || middlename.getText().equals("")
+                || phonenumber.getText().equals("") || email.getText().equals(""))
+            Alerts.showAlert("Нет данных для поиска", "Заполните все поля для поиска");
         else {
             String filtering = new StringBuilder("?lastname=").append(lastname.getText()).append("&firstname=").append(firstname.getText())
                     .append("&middlename=").append(middlename.getText()).append("&phonenumber=").append(phonenumber.getText())
